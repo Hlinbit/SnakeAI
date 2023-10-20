@@ -33,21 +33,21 @@ class Agent:
         
         state = [
             # straight danger
-            dir_r and game.is_collision(point_r),
-            dir_l and game.is_collision(point_l),
-            dir_d and game.is_collision(point_d),
+            dir_r and game.is_collision(point_r) or
+            dir_l and game.is_collision(point_l) or
+            dir_d and game.is_collision(point_d) or
             dir_u and game.is_collision(point_u),
             
             # right danger
-            dir_r and game.is_collision(point_d),
-            dir_l and game.is_collision(point_u),
-            dir_d and game.is_collision(point_l),
+            dir_r and game.is_collision(point_d) or
+            dir_l and game.is_collision(point_u) or
+            dir_d and game.is_collision(point_l) or
             dir_u and game.is_collision(point_r),
             
             # left danger
-            dir_r and game.is_collision(point_u),
-            dir_l and game.is_collision(point_d),
-            dir_d and game.is_collision(point_r),
+            dir_r and game.is_collision(point_u) or
+            dir_l and game.is_collision(point_d) or
+            dir_d and game.is_collision(point_r) or
             dir_u and game.is_collision(point_l),
             
             dir_l,
@@ -57,8 +57,8 @@ class Agent:
             
             game.head.x > game.food.x, # food left
             game.head.x < game.food.x, # food right
-            game.head.y > game.food.y, # food down
-            game.head.y < game.food.y # food up
+            game.head.y < game.food.y, # food down
+            game.head.y > game.food.y  # food up
         ]
         
         return np.array(state, dtype=int)
@@ -86,7 +86,7 @@ class Agent:
             final_move[idx] = 1
         else:
             state_tensor = torch.tensor(state, dtype=torch.float)
-            pred = self.model.forward(state_tensor)
+            pred = self.model(state_tensor)
             idx = torch.argmax(pred).item()
             final_move[idx] = 1
         return final_move
@@ -112,7 +112,7 @@ def train():
         agent.remember(state_old, final_move, reward, state_new, done)
         
         if done:
-            game._reset()
+            game.reset()
             agent.n_game += 1
             agent.train_long_memory()
             
@@ -127,6 +127,6 @@ def train():
             
             plot(plot_scores, plot_mean_scores)
 
-if __name__ == '__main_':
+if __name__ == '__main__':
     train()
     

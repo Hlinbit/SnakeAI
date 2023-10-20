@@ -27,13 +27,13 @@ class QTrainer:
         self.model = model
         self.lr = lr
         self.gama = gama
-        self.optimizor = optim.Adam(model.paraments(), lr)
+        self.optimizor = optim.Adam(model.parameters(), lr)
         self.criterion = nn.MSELoss()
     def train_step(self, state, action, reward, next_state, done):
-        state = torch.tensor(state, dtype=float)
-        action = torch.tensor(action, dtype=float)
-        reward = torch.tensor(reward, dtype=float)
-        next_state = torch.tensor(next_state, dtype=float)
+        state = torch.tensor(state, dtype=torch.float)
+        action = torch.tensor(action, dtype=torch.float)
+        reward = torch.tensor(reward, dtype=torch.float)
+        next_state = torch.tensor(next_state, dtype=torch.float)
 
         if len(state.shape) == 1:
             state = torch.unsqueeze(state, 0)
@@ -48,7 +48,7 @@ class QTrainer:
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
-                Q_new = reward[idx] + self.gama * torch.argmax(self.model(next_state[idx]))
+                Q_new = reward[idx] + self.gama * torch.max(self.model(next_state[idx]))
             
             target[idx][torch.argmax(action[idx]).item()] = Q_new
             
